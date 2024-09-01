@@ -1,5 +1,4 @@
 ﻿@inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar">
@@ -26,35 +25,3 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
-
-
-@code 
-{
-    [CascadingParameter]
-    public HttpContext HttpContext { get; set; }= default!;
-
-    [CascadingParameter] 
-    private Task<AuthenticationState>? AuthState { get; set; }
-    public UserLoginInfo UserUserLoginInfo { get; set; } = new();
-    
-    public async Task LogoutUser()
-    {
-        if (AuthState is not null)
-        {
-            var authState = await AuthState;
-            var username = authState.User.Identity?.Name;
-
-            if (!string.IsNullOrEmpty(username))
-            {
-                var claims = new List<Claim>();
-                claims.Add(new Claim(ClaimTypes.Name, UserUserLoginInfo.Username));
-
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                var principal = new ClaimsPrincipal(identity);
-                await HttpContext.SignInAsync(principal);
-            }
-
-            NavigationManager.NavigateTo("/");
-        }
-    }
-}
