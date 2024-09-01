@@ -1,5 +1,8 @@
-﻿@using Blazor8Auth.Services
+﻿@using System.Net
+@using Blazor8Auth.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @inherits LayoutComponentBase
+@inject AuthenticationStateProvider stateProvider
 
 <div class="page">
     <div class="sidebar">
@@ -8,7 +11,11 @@
 
     <main>
         <div class="top-row px-4">
+            
             <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <Authorized>
+                <a href="">@username</a>
+            </Authorized>
         </div>
 
         <article class="content px-4">
@@ -23,10 +30,12 @@
     <a class="dismiss">🗙</a>
 </div>
 
-@code {
+@code 
+{
     [Inject] private IAuthService AuthService { get; set; }
     [Inject] private NavigationManager NavigationManager { get; set; }
-
+    private string username = "";
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // A hard refresh or the user just navigated to the application for the first time
@@ -45,5 +54,7 @@
                 NavigationManager.Refresh();
             }
         }
+        
+        username = (await stateProvider.GetAuthenticationStateAsync()).User.Identity.Name;
     }
 }

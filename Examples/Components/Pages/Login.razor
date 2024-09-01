@@ -1,0 +1,40 @@
+@page "/login"
+@using System.Net
+@using System.Security.Claims
+@using Examples.Dtos
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@inject NavigationManager NavigationManager
+
+<h3>Login</h3>
+
+<EditForm method="Post" OnSubmit="LoginUser" Model="@UserCredentials" FormName="LoginUser">
+    @* <InputText @bind-value="@UserCredentials.Username" class="form-control"></InputText> *@
+    @* <InputText @bind-value="@UserCredentials.Password" class="form-control"></InputText> *@
+    <button type="submit" class="btn btn-primary mt-2">Sign in</button>
+</EditForm>
+
+@code 
+{
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; }= default!;
+
+    public string username { get; set; } = "";
+    public Credentials UserCredentials { get; set; } = new();
+    
+    public async Task LoginUser()
+    {
+        UserCredentials = new Credentials { Username = "freemanke", Password = "freemanke" };
+        if (UserCredentials is { Username: "freemanke", Password: "freemanke" })
+        {
+            var claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, UserCredentials.Username));
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(principal);
+            
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

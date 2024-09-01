@@ -1,11 +1,15 @@
 # Custom Authentication with Blazor 8 and Server Interactive Render Mode
 
-TLDR; Clone the GitHub repository below.  Review the Login.razor.cs HandleLogin method how it calls the AuthDataService for the custom authentication.  Then look at the code for the AuthService.cs Login method.  Finally, look at the MainLayout.razor OnAfterRenderAsync method how it refreshes the page if the session is lost.
+TLDR; Clone the GitHub repository below.  
+Review the Login.razor.cs HandleLogin method how it calls the AuthDataService for the custom authentication.  
+Then look at the code for the AuthService.cs Login method.  
+Finally, look at the MainLayout.razor OnAfterRenderAsync method how it refreshes the page if the session is lost.
 
 https://github.com/GregFinzer/Blazor8Auth
 
 ## Blazor 8 Built In Authentication
-Blazor 8 provides authentication out of the box with its Identity Template and Blazor Server Interactive.  It is a lot of boilerplate code that most likely will not be used by your enterprise.
+Blazor 8 provides authentication out of the box with its Identity Template and Blazor Server Interactive.  
+It is a lot of boilerplate code that most likely will not be used by your enterprise.
 
 The steps to create are:
 1.	Create a new application in Visual Studio
@@ -20,7 +24,8 @@ Patrick God does a great job explaining this in his YouTube video.
 [![.NET 8 Blazor Authentication](https://img.youtube.com/vi/tNzSuwV62Lw/0.jpg)](https://www.youtube.com/watch?v=tNzSuwV62Lw)
 
 ## The Misery of the Internet
-However, what if you don’t want to be married to Entity Framework or you have an external custom authentication provider that maintains the session in a cookie?  
+However, what if you don’t want to be married to Entity Framework or you have an external 
+custom authentication provider that maintains the session in a cookie?  
 
 ### A lot of other people are stuck
 https://www.reddit.com/r/Blazor/comments/1abr7u7/how_do_you_persist_login_for_a_user_in_blazor_net/
@@ -80,9 +85,13 @@ https://learn.microsoft.com/en-us/aspnet/core/blazor/security/?view=aspnetcore-8
 https://learn.microsoft.com/en-us/aspnet/core/blazor/security/server/?view=aspnetcore-8.0&tabs=visual-studio
 
 ## The Solution
-I came up with what I am hoping is a temporary solution until someone responds with something better.  Blazor keeps track of the session on the back end and this solution also maintains a duplicate JWT in a Browser Session Cookie.  When AuthService.cs logs in, it saves it to both the back end session and the Browser session.  When it logs out, it clears both.  It also has the ability to get the browser session if the back end session is lost.
+I came up with what I am hoping is a temporary solution until someone responds with something better.  
+Blazor keeps track of the session on the back end and this solution also maintains a duplicate JWT in a Browser Session Cookie.  
+When AuthService.cs logs in, it saves it to both the back end session and the Browser session. 
+When it logs out, it clears both.  It also has the ability to get the browser session if the back end session is lost.
 
-Review the Login.razor.cs HandleLogin method how it calls the AuthDataService for the custom authentication. Then look at the code for the AuthService.cs Login method. Finally, look at the MainLayout.razor OnAfterRenderAsync method how it refreshes the page if the session is lost.
+Review the Login.razor.cs HandleLogin method how it calls the AuthDataService for the custom authentication. 
+Then look at the code for the AuthService.cs Login method. Finally, look at the MainLayout.razor OnAfterRenderAsync method how it refreshes the page if the session is lost.
 
 1.	**AuthService.cs** – It stores the session as a JWT as a Session Cookie using Blazored.SessionStorage.  It handles logging in, logging out, and restoring the session.
 2.	**CustomAuthStateProvider.cs** – It will notify the Blazor backend session when you are logged in.
@@ -93,22 +102,33 @@ Review the Login.razor.cs HandleLogin method how it calls the AuthDataService fo
 
 ### Use Cases
 #### Normal Login
-When the user goes to the login page and logs in, the back end session is updated for the CurrentUser and the session is set to the Browser Session JWT Cookie.
+When the user goes to the login page and logs in, the back end session is updated for the CurrentUser and 
+the session is set to the Browser Session JWT Cookie.
 
 #### Normal Logout
 When the user goes to the logout page, it clears the back end session and then removes the Browser Session JWT Cookie.
 
 #### Hard Reset
-When a hard reset is performed on any page, Main.Layout.razor will attempt to get the session from the browser and then refresh the page.  Log in and go to the /auth page.  Then do a control-F5 on your browser.
+When a hard reset is performed on any page, Main.Layout.razor will attempt to get the session from 
+the browser and then refresh the page.  Log in and go to the /auth page.  Then do a control-F5 on your browser.
 
 #### Deep Link Authentication and Not Logged In
-When a user deep links to a page that requires authentication and they are not authenticated, it will redirect them to login.  To test this, go directly to the /mustBeLoggedIn page and it will redirect to the login.
+When a user deep links to a page that requires authentication and they are not authenticated, 
+it will redirect them to login.  To test this, go directly to the /mustBeLoggedIn page and it will redirect to the login.
 
 #### Deep Link Authentication and Back End Session Lost
-When a user deep links to a page that requires authentication and they have lost their back end session but they still have a browser session, they will be redirected to login, the session restored, and then redirected back to the page they were on.  To test this scenario, login then go to the /mustBeLoggedIn and do a Control-F5 on your browser.
+When a user deep links to a page that requires authentication and they have lost their back end session 
+but they still have a browser session, they will be redirected to login, the session restored, 
+and then redirected back to the page they were on.  To test this scenario, login then go to the /mustBeLoggedIn 
+and do a Control-F5 on your browser.
 
 #### Deep Link Authentication, Session Lost, No Access
-When a user deep links to a page and they have lost their back end session, and that page requires a certain role but they do not have it, it will attempt to restore their session and then display a message.  To test this, login as super@acme.com and then go to the /mustBeAdmin and do a Control-F5 on your browser.
+When a user deep links to a page and they have lost their back end session, 
+and that page requires a certain role but they do not have it, it will attempt to restore their session 
+and then display a message.  To test this, login as super@acme.com and then go to the /mustBeAdmin
+and do a Control-F5 on your browser.
 
 ### Updates to This Repository
-I am hoping that someone has an idea how to simplify this repository based on implementing classes built into Blazor 8 identity.  So far, this is the only thing that works for Custom Authorization and Authentication.
+I am hoping that someone has an idea how to simplify this repository based 
+on implementing classes built into Blazor 8 identity.  So far, this is the only thing 
+that works for Custom Authorization and Authentication.

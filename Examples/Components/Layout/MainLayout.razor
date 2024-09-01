@@ -1,0 +1,60 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu/>
+    </div>
+
+    <main>
+        <AuthorizeView>
+            <Authorized>
+                <button class="btn btn-primary" @onclick="@LogoutUser">退出</button>
+            </Authorized>
+            <NotAuthorized>
+                
+            </NotAuthorized>
+        </AuthorizeView>
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+
+@code 
+{
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; }= default!;
+
+    [CascadingParameter] 
+    private Task<AuthenticationState>? AuthState { get; set; }
+    public Credentials UserCredentials { get; set; } = new();
+    
+    public async Task LogoutUser()
+    {
+        if (AuthState is not null)
+        {
+            var authState = await AuthState;
+            var username = authState.User.Identity?.Name;
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                var claims = new List<Claim>();
+                claims.Add(new Claim(ClaimTypes.Name, UserCredentials.Username));
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(principal);
+            }
+
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

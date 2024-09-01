@@ -1,0 +1,43 @@
+@page "/logout"
+
+@inject NavigationManager NavigationManager
+
+<h3>Logout</h3>
+
+<EditForm method="Post" OnSubmit="LogoutUser" Model="@UserCredentials" FormName="Logout">
+    @* <InputText @bind-value="@UserCredentials.Username" class="form-control"></InputText> *@
+    @* <InputText @bind-value="@UserCredentials.Password" class="form-control"></InputText> *@
+    <button type="submit" class="btn btn-primary mt-2">Logout</button>
+</EditForm>
+
+@code 
+{
+    [CascadingParameter]
+    public HttpContext HttpContext { get; set; }= default!;
+
+    [CascadingParameter] 
+    private Task<AuthenticationState>? AuthState { get; set; }
+    public Credentials UserCredentials { get; set; } = new();
+    
+    public async Task LogoutUser()
+    {
+        if (AuthState is not null)
+        {
+            var authState = await AuthState;
+            var username = authState.User.Identity?.Name;
+
+            if (!string.IsNullOrEmpty(username))
+            {
+                var claims = new List<Claim>();
+                claims.Add(new Claim(ClaimTypes.Name, UserCredentials.Username));
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(principal);
+            }
+
+            NavigationManager.NavigateTo("/");
+        }
+    }
+    
+}
