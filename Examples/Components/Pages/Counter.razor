@@ -1,24 +1,29 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>交互式服务器端渲染模式</PageTitle>
 
-<h1>Counter</h1>
+<h3>交互式服务器端渲染模式</h3>
 
-<p role="status">Current count: @currentCount</p>
-<p>已登录用户：@username</p>
+<p role="status">计数器: @currentCount</p>
+<p>当前登录用户：@username</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="IncrementCountAsync">计数器累加</button>
 
 @code 
 {
     private string? username = "";
-    private int currentCount = 0;
+    private int currentCount;
 
     [CascadingParameter] 
     private Task<AuthenticationState>? AuthState { get; set; }
-    
-    private async Task IncrementCount()
+
+    protected override async Task OnInitializedAsync()
+    {
+        await IncrementCountAsync();
+    }
+
+    private async Task IncrementCountAsync()
     {
         currentCount++;
         
