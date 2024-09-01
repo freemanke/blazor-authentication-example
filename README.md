@@ -1,3 +1,5 @@
+https://readmedium.com/custom-cookie-authentication-in-blazor-ssr-interactive-server-for-net-8-32fedd33267b
+
 # Custom Authentication with Blazor 8 and Server Interactive Render Mode
 
 TLDR; Clone the GitHub repository below.  
